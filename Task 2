@@ -1,0 +1,146 @@
+# HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Chat Application</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="chat-container">
+    <div id="chat-header">Chat Application</div>
+    <div id="messages"></div>
+    <div id="input-container">
+      <input type="text" id="message-input" placeholder="Type your message here...">
+      <button id="send-button">Send</button>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
+
+# CSS
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f9f9f9;
+}
+
+#chat-container {
+  width: 40%;
+  margin: 50px auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+  overflow: hidden;
+}
+
+#chat-header {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px;
+  text-align: center;
+  font-size: 1.5em;
+  border-bottom: 1px solid #0056b3;
+}
+
+#messages {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.message {
+  margin: 5px 0;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.sent {
+  background-color: #d1ffd1;
+  align-self: flex-end;
+}
+
+.received {
+  background-color: #d1e7ff;
+  align-self: flex-start;
+}
+
+#input-container {
+  display: flex;
+  border-top: 1px solid #ccc;
+  padding: 10px;
+}
+
+#message-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+#send-button {
+  margin-left: 10px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#send-button:hover {
+  background-color: #0056b3;
+}
+
+
+# JAVASCRIPT
+// WebSocket connection
+const socket = new WebSocket('ws://localhost:3000');
+
+// DOM Elements
+const messagesDiv = document.getElementById('messages');
+const messageInput = document.getElementById('message-input');
+const sendButton = document.getElementById('send-button');
+
+// Handle incoming messages
+socket.onmessage = (event) => {
+  const message = event.data;
+
+  const messageDiv = document.createElement('div');
+  messageDiv.textContent = message;
+  messageDiv.classList.add('message', 'received');
+  messagesDiv.appendChild(messageDiv);
+
+  // Auto-scroll to the bottom
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+};
+
+// Send messages
+sendButton.addEventListener('click', () => {
+  const message = messageInput.value;
+
+  if (message) {
+    // Send to server
+    socket.send(message);
+
+    // Add to the chat as sent message
+    const messageDiv = document.createElement('div');
+    messageDiv.textContent = message;
+    messageDiv.classList.add('message', 'sent');
+    messagesDiv.appendChild(messageDiv);
+
+    // Clear the input
+    messageInput.value = '';
+
+    // Auto-scroll to the bottom
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+});
